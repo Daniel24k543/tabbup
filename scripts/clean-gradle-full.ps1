@@ -3,7 +3,7 @@ Write-Host "=== Limpieza completa de Gradle ===" -ForegroundColor Yellow
 
 # Mata procesos Java/Gradle que puedan estar bloqueando archivos
 Write-Host "Deteniendo procesos Java/Gradle..." -ForegroundColor Cyan
-Get-Process | Where-Object {$_.ProcessName -match "java|gradle"} | Stop-Process -Force -ErrorAction SilentlyContinue
+Get-Process | Where-Object { $_.ProcessName -match "java|gradle" } | Stop-Process -Force -ErrorAction SilentlyContinue
 Start-Sleep -Seconds 2
 
 # Borra TODA la caché de Gradle
@@ -12,7 +12,8 @@ if (Test-Path $gradleCache) {
     Write-Host "Eliminando caché completo: $gradleCache" -ForegroundColor Red
     Remove-Item -Recurse -Force $gradleCache -ErrorAction SilentlyContinue
     Write-Host "Caché eliminado" -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "No se encontró caché de Gradle" -ForegroundColor Yellow
 }
 

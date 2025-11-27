@@ -2,7 +2,7 @@
 import { useNavigation } from '@react-navigation/native';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function LoginScreen() {
   const navigation = useNavigation();
@@ -22,17 +22,18 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Video de Fondo */}
-      <VideoView
-        style={styles.video}
-        player={player}
-        contentFit="cover"
-        nativeControls={false}
-      />
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#000' }}>
+      <View style={styles.container}>
+        {/* Video de Fondo */}
+        <VideoView
+          style={styles.video}
+          player={player}
+          contentFit="cover"
+          nativeControls={false}
+        />
 
-      {/* Capa oscura */}
-      <View style={styles.overlay} />
+        {/* Capa oscura */}
+        <View style={styles.overlay} />
 
       <KeyboardAvoidingView 
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -55,7 +56,8 @@ export default function LoginScreen() {
           <Text style={styles.loginText}>INGRESAR</Text>
         </TouchableOpacity>
       </KeyboardAvoidingView>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }
 

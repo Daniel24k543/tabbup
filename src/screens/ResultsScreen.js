@@ -3,10 +3,8 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Home, RotateCcw, Trophy } from 'lucide-react-native';
 import { useEffect } from 'react';
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useGame } from '../context/GameContext';
-
-const { width } = Dimensions.get('window');
 
 export default function ResultsScreen() {
   const navigation = useNavigation();
@@ -50,8 +48,9 @@ export default function ResultsScreen() {
   };
 
   return (
-    <LinearGradient colors={['#1e40af', '#3b82f6', '#1e40af']} style={styles.container}>
-      <View style={styles.content}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#1e40af' }}>
+      <LinearGradient colors={['#1e40af', '#3b82f6', '#1e40af']} style={styles.container}>
+        <View style={styles.content}>
         
         {/* RESULTADO */}
         <View style={styles.resultBox}>
@@ -111,7 +110,8 @@ export default function ResultsScreen() {
           <Text style={styles.btnText}>REVANCHA</Text>
         </TouchableOpacity>
       </View>
-    </LinearGradient>
+      </LinearGradient>
+    </SafeAreaView>
   );
 }
 

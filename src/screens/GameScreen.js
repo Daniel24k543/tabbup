@@ -2,9 +2,9 @@
 import { useNavigation } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import { X, MessageCircle, Smile, Clock, Send, Zap } from 'lucide-react-native';
+import { Clock, MessageCircle, Send, Smile, X, Zap } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Animated, BackHandler, Dimensions, StyleSheet, Text, TouchableOpacity, View, FlatList, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { Alert, Animated, BackHandler, Dimensions, FlatList, KeyboardAvoidingView, Platform, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useGame } from '../context/GameContext';
 
 const { width, height } = Dimensions.get('window');
@@ -351,14 +351,15 @@ export default function GameScreen() {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={[styles.container, { backgroundColor: '#0f172a' }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      {/* BOTÓN SALIR */}
-      <TouchableOpacity style={styles.quitBtn} onPress={handleQuitGame}>
-        <X color="#fff" size={28} />
-      </TouchableOpacity>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#0f172a' }}>
+      <KeyboardAvoidingView 
+        style={[styles.container, { backgroundColor: '#0f172a' }]}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        {/* BOTÓN SALIR */}
+        <TouchableOpacity style={styles.quitBtn} onPress={handleQuitGame}>
+          <X color="#fff" size={28} />
+        </TouchableOpacity>
 
       {/* HEADER CON TIMER Y VENTAJAS ACTIVAS */}
       <View style={styles.header}>
@@ -607,7 +608,8 @@ export default function GameScreen() {
           </LinearGradient>
         </View>
       )}
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 

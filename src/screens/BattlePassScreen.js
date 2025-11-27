@@ -16,7 +16,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { useGame } from '../context/GameContext';
 
 const BattlePassScreen = ({ navigation }) => {
-  const { userProfile, coins, awardCoins } = useGame();
+  const { userProfile, coins } = useGame();
   const [hasPremium, setHasPremium] = useState(false);
   
   // XP actual y nivel del Battle Pass

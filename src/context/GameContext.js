@@ -19,6 +19,7 @@ export const GameProvider = ({ children }) => {
 
   // --- 💰 ECONOMÍA & INVENTARIO ---
   const [coins, setCoins] = useState(1000);
+  const [gems, setGems] = useState(50); // MONEDA PREMIUM
   const [isPremium, setIsPremium] = useState(false);
   const [hasMicrophone, setHasMicrophone] = useState(false); // NUEVO: Compra de micrófono
   const [hasNoAds, setHasNoAds] = useState(false); // NUEVO: Eliminación de anuncios
@@ -30,6 +31,14 @@ export const GameProvider = ({ children }) => {
   // TABLEROS (NUEVO)
   const [boardSkin, setBoardSkin] = useState('DEFAULT'); // Tablero equipado
   const [unlockedBoards, setUnlockedBoards] = useState(['DEFAULT']); // Tableros comprados
+  
+  // PARTÍCULAS (Para modo clics libres)
+  const [particleSkin, setParticleSkin] = useState('DEFAULT');
+  const [unlockedParticles, setUnlockedParticles] = useState(['DEFAULT']);
+  
+  // FONDOS DE ZONA TAP (backgrounds)
+  const [tapBackground, setTapBackground] = useState('DEFAULT');
+  const [unlockedBackgrounds, setUnlockedBackgrounds] = useState(['DEFAULT']);
   
   // VENTAJAS (BOOSTS)
   const [activeBoosts, setActiveBoosts] = useState([]); // Boosts activos en la partida actual
@@ -57,6 +66,14 @@ export const GameProvider = ({ children }) => {
     currentWinStreak: 0,
     maxTapsPerSecond: 0,
   });
+  
+  // --- 🎯 MODO CLICS LIBRES ---
+  const [freeClickRecord, setFreeClickRecord] = useState(0); // Récord personal
+  const [freeClickRewardsEarned, setFreeClickRewardsEarned] = useState([]); // Hitos alcanzados
+  
+  // --- 💕 MODO ROMÁNTICO ---
+  const [romanticWins, setRomanticWins] = useState(0);
+  const [romanticPlayed, setRomanticPlayed] = useState(0);
 
   // --- 🎮 JUEGO ---
   const [gameMode, setGameMode] = useState(null);
@@ -73,15 +90,18 @@ export const GameProvider = ({ children }) => {
     const loadUserData = async () => {
       try {
         const keys = [
-          'userCoins', 'userProfile', 'userSkins', 'userBoards', 
+          'userCoins', 'userGems', 'userProfile', 'userSkins', 'userBoards', 
           'equippedBoard', 'equippedSkin', 'hasMicrophone', 'hasNoAds',
           'dailyMissions', 'weeklyMissions', 'achievements', 
-          'lastDailyReset', 'lastWeeklyReset', 'gameStats'
+          'lastDailyReset', 'lastWeeklyReset', 'gameStats',
+          'unlockedParticles', 'equippedParticle', 'unlockedBackgrounds', 'equippedBackground',
+          'freeClickRecord', 'freeClickRewards', 'romanticWins', 'romanticPlayed'
         ];
         const result = await AsyncStorage.multiGet(keys);
         const data = Object.fromEntries(result);
 
         if (data.userCoins) setCoins(parseInt(data.userCoins));
+        if (data.userGems) setGems(parseInt(data.userGems));
         if (data.userProfile) setUserProfile(JSON.parse(data.userProfile));
         if (data.userSkins) setUnlockedSkins(JSON.parse(data.userSkins));
         if (data.userBoards) setUnlockedBoards(JSON.parse(data.userBoards));
@@ -89,6 +109,18 @@ export const GameProvider = ({ children }) => {
         if (data.equippedSkin) setTapSkin(data.equippedSkin);
         if (data.hasMicrophone) setHasMicrophone(data.hasMicrophone === 'true');
         if (data.hasNoAds) setHasNoAds(data.hasNoAds === 'true');
+        
+        // Cargar partículas y fondos
+        if (data.unlockedParticles) setUnlockedParticles(JSON.parse(data.unlockedParticles));
+        if (data.equippedParticle) setParticleSkin(data.equippedParticle);
+        if (data.unlockedBackgrounds) setUnlockedBackgrounds(JSON.parse(data.unlockedBackgrounds));
+        if (data.equippedBackground) setTapBackground(data.equippedBackground);
+        
+        // Cargar récords y romántico
+        if (data.freeClickRecord) setFreeClickRecord(parseInt(data.freeClickRecord));
+        if (data.freeClickRewards) setFreeClickRewardsEarned(JSON.parse(data.freeClickRewards));
+        if (data.romanticWins) setRomanticWins(parseInt(data.romanticWins));
+        if (data.romanticPlayed) setRomanticPlayed(parseInt(data.romanticPlayed));
         
         // Cargar misiones
         if (data.dailyMissions) setDailyMissions(JSON.parse(data.dailyMissions));
@@ -166,6 +198,7 @@ export const GameProvider = ({ children }) => {
   const saveData = async () => {
     // Guardamos todo localmente (idealmente esto iría a Firebase también)
     await AsyncStorage.setItem('userCoins', coins.toString());
+    await AsyncStorage.setItem('userGems', gems.toString());
     await AsyncStorage.setItem('userProfile', JSON.stringify(userProfile));
     await AsyncStorage.setItem('userBoards', JSON.stringify(unlockedBoards));
     await AsyncStorage.setItem('equippedBoard', boardSkin);
@@ -175,16 +208,28 @@ export const GameProvider = ({ children }) => {
     await AsyncStorage.setItem('weeklyMissions', JSON.stringify(weeklyMissions));
     await AsyncStorage.setItem('achievements', JSON.stringify(achievements));
     await AsyncStorage.setItem('gameStats', JSON.stringify(gameStats));
+    await AsyncStorage.setItem('unlockedParticles', JSON.stringify(unlockedParticles));
+    await AsyncStorage.setItem('equippedParticle', particleSkin);
+    await AsyncStorage.setItem('unlockedBackgrounds', JSON.stringify(unlockedBackgrounds));
+    await AsyncStorage.setItem('equippedBackground', tapBackground);
+    await AsyncStorage.setItem('freeClickRecord', freeClickRecord.toString());
+    await AsyncStorage.setItem('freeClickRewards', JSON.stringify(freeClickRewardsEarned));
+    await AsyncStorage.setItem('romanticWins', romanticWins.toString());
+    await AsyncStorage.setItem('romanticPlayed', romanticPlayed.toString());
     if (lastDailyReset) await AsyncStorage.setItem('lastDailyReset', lastDailyReset.toString());
     if (lastWeeklyReset) await AsyncStorage.setItem('lastWeeklyReset', lastWeeklyReset.toString());
   };
 
   // 2. FUNCIONES DE TIENDA (TABLEROS Y EFECTOS)
-  const buyItem = (type, id, cost) => {
-    if (coins < cost) return false;
-
-    const newCoins = coins - cost;
-    setCoins(newCoins);
+  const buyItem = (type, id, cost, currency = 'coins') => {
+    // Verificar si tiene suficiente moneda
+    if (currency === 'gems') {
+      if (gems < cost) return false;
+      setGems(gems - cost);
+    } else {
+      if (coins < cost) return false;
+      setCoins(coins - cost);
+    }
 
     if (type === 'board') {
         const newBoards = [...unlockedBoards, id];
@@ -194,6 +239,14 @@ export const GameProvider = ({ children }) => {
         const newSkins = [...unlockedSkins, id];
         setUnlockedSkins(newSkins);
         setTapSkin(id);
+    } else if (type === 'particle') {
+        const newParticles = [...unlockedParticles, id];
+        setUnlockedParticles(newParticles);
+        setParticleSkin(id);
+    } else if (type === 'background') {
+        const newBackgrounds = [...unlockedBackgrounds, id];
+        setUnlockedBackgrounds(newBackgrounds);
+        setTapBackground(id);
     } else if (type === 'microphone') {
         setHasMicrophone(true);
     } else if (type === 'noads') {
@@ -214,6 +267,8 @@ export const GameProvider = ({ children }) => {
   const equipItem = (type, id) => {
     if (type === 'board' && unlockedBoards.includes(id)) setBoardSkin(id);
     if (type === 'skin' && unlockedSkins.includes(id)) setTapSkin(id);
+    if (type === 'particle' && unlockedParticles.includes(id)) setParticleSkin(id);
+    if (type === 'background' && unlockedBackgrounds.includes(id)) setTapBackground(id);
     saveData();
   };
   
@@ -544,6 +599,64 @@ export const GameProvider = ({ children }) => {
     }
   };
 
+  // --- 🎯 MODO CLICS LIBRES ---
+  const updateFreeClickRecord = (newScore) => {
+    if (newScore > freeClickRecord) {
+      setFreeClickRecord(newScore);
+      saveData();
+      return true; // Nuevo récord!
+    }
+    return false;
+  };
+
+  const checkFreeClickReward = (clicks) => {
+    const milestones = [
+      { clicks: 100, coins: 50, gems: 0, type: 'coins', msg: '¡100 clics! +50 monedas' },
+      { clicks: 500, coins: 200, gems: 5, type: 'both', msg: '¡500 clics! +200 monedas +5 gemas' },
+      { clicks: 1000, coins: 500, gems: 10, type: 'both', msg: '¡1,000 clics! +500 monedas +10 gemas' },
+      { clicks: 5000, coins: 0, gems: 50, type: 'particle', msg: '¡5,000 clics! Partícula especial desbloqueada' },
+      { clicks: 10000, coins: 0, gems: 100, type: 'background', msg: '¡10,000 clics! Fondo exclusivo desbloqueado' },
+    ];
+
+    for (const milestone of milestones) {
+      if (clicks === milestone.clicks && !freeClickRewardsEarned.includes(milestone.clicks)) {
+        // Otorgar recompensa
+        if (milestone.coins > 0) setCoins(c => c + milestone.coins);
+        if (milestone.gems > 0) setGems(g => g + milestone.gems);
+        
+        // Desbloquear items especiales
+        if (milestone.type === 'particle') {
+          setUnlockedParticles(prev => [...prev, 'RAINBOW_BURST']);
+        }
+        if (milestone.type === 'background') {
+          setUnlockedBackgrounds(prev => [...prev, 'GALAXY']);
+        }
+
+        // Registrar que se obtuvo
+        setFreeClickRewardsEarned(prev => [...prev, milestone.clicks]);
+        saveData();
+        
+        return milestone.msg;
+      }
+    }
+    return null;
+  };
+
+  // --- 💕 MODO ROMÁNTICO ---
+  const finishRomanticGame = (won) => {
+    setRomanticPlayed(prev => prev + 1);
+    if (won) {
+      setRomanticWins(prev => prev + 1);
+    }
+    saveData();
+  };
+
+  // GEMAS
+  const awardGems = (amount) => {
+    setGems(g => g + amount);
+    saveData();
+  };
+
   const tapOnline = () => {
     // Implementar lógica de tap en partida online si es necesario
   };
@@ -558,12 +671,15 @@ export const GameProvider = ({ children }) => {
 
   return (
     <GameContext.Provider value={{
-      coins, userProfile, // Perfil
+      coins, gems, userProfile, // Perfil y monedas
       tapSkin, unlockedSkins, boardSkin, unlockedBoards, chests, isPremium, hasMicrophone, hasNoAds, // Inventario
+      particleSkin, unlockedParticles, tapBackground, unlockedBackgrounds, // Nuevos skins
       activeBoosts, purchasedBoosts, activateBoosts, clearBoosts, // Boosts
       dailyMissions, weeklyMissions, achievements, gameStats, // Misiones
       updateMissionProgress, claimMissionReward, // Acciones de misiones
-      buyItem, equipItem, awardCoins, finishGame, openChest, updateUserProfile, // Acciones
+      freeClickRecord, freeClickRewardsEarned, updateFreeClickRecord, checkFreeClickReward, // Modo clics libres
+      romanticWins, romanticPlayed, finishRomanticGame, // Modo romántico
+      buyItem, equipItem, awardCoins, awardGems, finishGame, openChest, updateUserProfile, // Acciones
       createOnlineRoom, joinOnlineRoom, startGame, tapOnline, sendChatMessage, // Multiplayer
       players, roomCode, isHost, gameState, messages, // Estado Sala
       gameMode, setGameMode, settings, myId // Game Mode & Settings

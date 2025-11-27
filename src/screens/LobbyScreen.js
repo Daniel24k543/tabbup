@@ -6,9 +6,9 @@ import { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
-    Dimensions,
     KeyboardAvoidingView,
     Platform,
+    SafeAreaView,
     ScrollView,
     Share,
     StyleSheet,
@@ -18,8 +18,6 @@ import {
     View
 } from 'react-native';
 import { useGame } from '../context/GameContext';
-
-const { width } = Dimensions.get('window');
 
 export default function LobbyScreen() {
   const navigation = useNavigation();
@@ -108,16 +106,14 @@ export default function LobbyScreen() {
     { id: 'CARRERA', name: 'Carrera', emoji: '🏁', color: '#b45309' },
   ];
 
-  // COLORES PARA AVATARES
-  const avatarColors = ['#3b82f6', '#ef4444', '#22c55e', '#fbbf24'];
-
   // --- VISTA 1: FORMULARIO (Configuración antes de crear/unirse) ---
   if (!inLobby) {
     return (
-      <LinearGradient colors={['#1e40af', '#3b82f6']} style={styles.container}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <ArrowLeft color="#fff" size={28} />
-        </TouchableOpacity>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#1e40af' }}>
+        <LinearGradient colors={['#1e40af', '#3b82f6']} style={styles.container}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <ArrowLeft color="#fff" size={28} />
+          </TouchableOpacity>
 
         <Text style={styles.title}>
           {mode === 'create' && 'Configurar Sala'}
@@ -206,18 +202,20 @@ export default function LobbyScreen() {
             )}
           </>
         )}
-      </LinearGradient>
+        </LinearGradient>
+      </SafeAreaView>
     );
   }
 
   // --- VISTA 2: LOBBY CON CONFIGURACIÓN ---
   return (
-    <KeyboardAvoidingView 
-      style={{flex: 1}} 
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <LinearGradient colors={['#1e40af', '#3b82f6']} style={{flex: 1}}>
-        <ScrollView contentContainerStyle={styles.lobbyContainer}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#1e40af' }}>
+      <KeyboardAvoidingView 
+        style={{flex: 1}} 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <LinearGradient colors={['#1e40af', '#3b82f6']} style={{flex: 1}}>
+          <ScrollView contentContainerStyle={styles.lobbyContainer}>
           
           {/* HEADER CON CÓDIGO (solo para salas online) */}
           <View style={styles.header}>
@@ -441,8 +439,9 @@ export default function LobbyScreen() {
           
           <View style={{height: 40}} /> 
         </ScrollView>
-      </LinearGradient>
-    </KeyboardAvoidingView>
+        </LinearGradient>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 

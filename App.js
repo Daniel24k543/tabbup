@@ -6,6 +6,7 @@ import { GameProvider } from './src/context/GameContext';
 
 // Importar pantallas
 import BattlePassScreen from './src/screens/BattlePassScreen';
+import FreeClickScreen from './src/screens/FreeClickScreen';
 import GameScreen from './src/screens/GameScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import LeaderboardScreen from './src/screens/LeaderboardScreen';
@@ -14,6 +15,7 @@ import LobbyScreen from './src/screens/LobbyScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import MissionsScreen from './src/screens/MissionsScreen';
 import ResultsScreen from './src/screens/ResultsScreen';
+import RomanticModeScreen from './src/screens/RomanticModeScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import ShopScreen from './src/screens/ShopScreen';
 
@@ -38,6 +40,8 @@ export default function App() {
           <Stack.Screen name="Lobby" component={LobbyScreen} />
           <Stack.Screen name="Game" component={GameScreen} />
           <Stack.Screen name="Results" component={ResultsScreen} />
+          <Stack.Screen name="FreeClick" component={FreeClickScreen} />
+          <Stack.Screen name="RomanticMode" component={RomanticModeScreen} />
           <Stack.Screen name="Settings" component={SettingsScreen} />
           <Stack.Screen name="Shop" component={ShopScreen} />
           <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />

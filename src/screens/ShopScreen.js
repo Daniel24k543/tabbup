@@ -1,9 +1,9 @@
 // src/screens/ShopScreen.js
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowLeft, Check, Lock, Play, Sparkles } from 'lucide-react-native';
+import { ArrowLeft, Bot, Check, Crown, Diamond, Flame, Football, Gamepad2, Heart, Lock, Play, Rocket, Shield, Snail, Snowflake, Sparkles, Star, Trophy, Zap } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Dimensions, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Dimensions, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useGame } from '../context/GameContext';
 
 // PUBLICIDAD (AdMob)
@@ -13,6 +13,17 @@ const { width } = Dimensions.get('window');
 const adUnitId = __DEV__ ? TestIds.REWARDED : 'ca-app-pub-xxxxxxxxxxxxx/yyyyyyyyyy';
 
 const rewarded = RewardedAd.createForAdRequest(adUnitId, { requestNonPersonalizedAdsOnly: true });
+
+// MAPA DE ICONOS
+const IconMap = {
+  Zap, Shield, Snowflake, Snail, Bot, Flame, Star, Heart, Rocket, Diamond, Crown, Trophy, Gamepad2, Football
+};
+
+// Helper para renderizar iconos
+const renderIcon = (iconName, size = 24, color = '#fff') => {
+  const IconComponent = IconMap[iconName];
+  return IconComponent ? <IconComponent color={color} size={size} /> : <Text style={{fontSize: size}}>{iconName}</Text>;
+};
 
 // --- CATÁLOGO DE PRODUCTOS ---
 
@@ -32,16 +43,16 @@ const TAP_ITEMS = {
   BRAZIL: { name: 'Brasil', icon: '🇧🇷', price: 500 },
   SPAIN: { name: 'España', icon: '🇪🇸', price: 500 },
   USA: { name: 'USA', icon: '🇺🇸', price: 500 },
-  FIRE: { name: 'Fuego', icon: '🔥', price: 1000 },
-  STAR: { name: 'Estrellas', icon: '⭐', price: 1000 },
-  HEART: { name: 'Amor', icon: '💖', price: 1000 },
-  LIGHTNING: { name: 'Rayo', icon: '⚡', price: 1200 },
-  ROCKET: { name: 'Cohete', icon: '🚀', price: 1500 },
-  DIAMOND: { name: 'Diamante', icon: '💎', price: 2500 },
-  CROWN: { name: 'Corona', icon: '👑', price: 3000 },
-  TROPHY: { name: 'Trofeo', icon: '🏆', price: 3500 },
-  SOCCER: { name: 'Fútbol', icon: '⚽', price: 1800 },
-  GAMING: { name: 'Gaming', icon: '🎮', price: 2000 },
+  FIRE: { name: 'Fuego', icon: 'Flame', price: 1000 },
+  STAR: { name: 'Estrellas', icon: 'Star', price: 1000 },
+  HEART: { name: 'Amor', icon: 'Heart', price: 1000 },
+  LIGHTNING: { name: 'Rayo', icon: 'Zap', price: 1200 },
+  ROCKET: { name: 'Cohete', icon: 'Rocket', price: 1500 },
+  DIAMOND: { name: 'Diamante', icon: 'Diamond', price: 2500 },
+  CROWN: { name: 'Corona', icon: 'Crown', price: 3000 },
+  TROPHY: { name: 'Trofeo', icon: 'Trophy', price: 3500 },
+  SOCCER: { name: 'Fútbol', icon: 'Football', price: 1800 },
+  GAMING: { name: 'Gaming', icon: 'Gamepad2', price: 2000 },
 };
 
 const BOARD_ITEMS = {
@@ -54,11 +65,34 @@ const BOARD_ITEMS = {
 };
 
 const BOOST_ITEMS = {
-  DOUBLE_TAP: { name: 'Tap x2', icon: '⚡', description: 'Cada tap vale 2 puntos', price: 5000, duration: 60 },
-  SHIELD: { name: 'Escudo', icon: '🛡️', description: 'Protección contra ataques', price: 4000, duration: 45 },
-  FREEZE: { name: 'Congelar', icon: '❄️', description: 'Congela al rival 10 segundos', price: 6000, duration: 10 },
-  SLOW_MOTION: { name: 'Cámara Lenta', icon: '🐌', description: 'Ralentiza al rival', price: 3500, duration: 30 },
-  AUTO_TAP: { name: 'Auto-Tap', icon: '🤖', description: 'Taps automáticos', price: 7000, duration: 20 },
+  DOUBLE_TAP: { name: 'Tap x2', icon: 'Zap', description: 'Cada tap vale 2 puntos', price: 5000, duration: 60 },
+  SHIELD: { name: 'Escudo', icon: 'Shield', description: 'Protección contra ataques', price: 4000, duration: 45 },
+  FREEZE: { name: 'Congelar', icon: 'Snowflake', description: 'Congela al rival 10 segundos', price: 6000, duration: 10 },
+  SLOW_MOTION: { name: 'Cámara Lenta', icon: 'Snail', description: 'Ralentiza al rival', price: 3500, duration: 30 },
+  AUTO_TAP: { name: 'Auto-Tap', icon: 'Bot', description: 'Taps automáticos', price: 7000, duration: 20 },
+};
+
+// FONDOS DE ZONA TAP (backgrounds)
+const BACKGROUND_ITEMS = {
+  DEFAULT: { name: 'Predeterminado', gradient: ['#6366f1', '#8b5cf6'], price: 0, currency: 'coins' },
+  GALAXY: { name: 'Galaxia', gradient: ['#1a1a2e', '#16213e', '#0f3460'], price: 3000, currency: 'coins' },
+  SUNSET: { name: 'Atardecer', gradient: ['#ff6b6b', '#ee5a6f', '#c44569'], price: 5000, currency: 'coins' },
+  OCEAN: { name: 'Océano Profundo', gradient: ['#0575e6', '#021b79'], price: 8000, currency: 'coins' },
+  FOREST: { name: 'Bosque Mágico', gradient: ['#134e5e', '#71b280'], price: 10000, currency: 'coins' },
+  FIRE: { name: 'Llamas Eternas', gradient: ['#ff0844', '#ffb199'], price: 25, currency: 'gems' },
+  COSMIC: { name: 'Cosmos Infinito', gradient: ['#667eea', '#764ba2', '#f093fb'], price: 50, currency: 'gems' },
+};
+
+// PARTÍCULAS (solo para modo clics libres)
+const PARTICLE_ITEMS = {
+  DEFAULT: { name: 'Clásico', icon: '+1', color: '#fff', price: 0, currency: 'coins' },
+  RAINBOW_BURST: { name: 'Estallido Arcoíris', icon: '✨', color: '#ff00ff', price: 2000, currency: 'coins', special: true },
+  FIRE: { name: 'Fuego Intenso', icon: '🔥', color: '#ff6b35', price: 3000, currency: 'coins' },
+  STAR: { name: 'Estrellas Brillantes', icon: '⭐', color: '#ffd700', price: 3500, currency: 'coins' },
+  HEART: { name: 'Corazones Rosa', icon: '💖', color: '#ff1493', price: 4000, currency: 'coins' },
+  LIGHTNING: { name: 'Rayos Dorados', icon: '⚡', color: '#ffeb3b', price: 5000, currency: 'coins' },
+  DIAMOND: { name: 'Diamantes Exclusivos', icon: '💎', color: '#00d9ff', price: 30, currency: 'gems', premium: true },
+  CROWN: { name: 'Coronas Reales', icon: '👑', color: '#ffd700', price: 40, currency: 'gems', premium: true },
 };
 
 export default function ShopScreen() {
@@ -66,14 +100,16 @@ export default function ShopScreen() {
   
   // Traemos todas las funciones del contexto
   const { 
-    coins, awardCoins, 
+    coins, gems, awardCoins, 
     buyItem, equipItem, // Funciones genéricas que creamos
     unlockedSkins, tapSkin, 
     unlockedBoards, boardSkin,
+    unlockedParticles, particleSkin,
+    unlockedBackgrounds, tapBackground,
     hasMicrophone, hasNoAds // NUEVO
   } = useGame();
 
-  const [activeTab, setActiveTab] = useState('coins'); // coins | taps | boards | boosts | premium
+  const [activeTab, setActiveTab] = useState('coins'); // coins | taps | boards | backgrounds | particles | boosts | premium
   const [adLoaded, setAdLoaded] = useState(false);
 
   // Cargar Anuncio
@@ -87,7 +123,7 @@ export default function ShopScreen() {
     });
     rewarded.load();
     return () => { unsubscribeLoaded(); unsubscribeEarned(); };
-  }, []);
+  }, [awardCoins]);
 
   const showAd = () => {
     if (adLoaded) rewarded.show();
@@ -121,36 +157,48 @@ export default function ShopScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#c0392b" />
-      
-      {/* Header */}
-      <LinearGradient colors={['#c0392b', '#8e44ad']} style={styles.header}>
-         <View style={styles.headerRow}>
-            <TouchableOpacity onPress={() => navigation.goBack()}><ArrowLeft color="#fff" size={26}/></TouchableOpacity>
-            <Text style={styles.title}>TIENDA</Text>
-            <View style={styles.coinBadge}><Text style={styles.coinText}>💰 {coins}</Text></View>
-         </View>
-      </LinearGradient>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#c0392b' }}>
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="#c0392b" />
+        
+        {/* Header */}
+        <LinearGradient colors={['#c0392b', '#8e44ad']} style={styles.header}>
+          <View style={styles.headerRow}>
+              <TouchableOpacity onPress={() => navigation.goBack()}><ArrowLeft color="#fff" size={26}/></TouchableOpacity>
+              <Text style={styles.title}>TIENDA</Text>
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <View style={styles.coinBadge}><Text style={styles.coinText}>💰 {coins}</Text></View>
+                <View style={styles.gemBadge}><Text style={styles.gemText}>💎 {gems}</Text></View>
+              </View>
+          </View>
+        </LinearGradient>
 
-      {/* PESTAÑAS (TABS) */}
-      <View style={styles.tabs}>
-        <TouchableOpacity onPress={() => setActiveTab('coins')} style={[styles.tab, activeTab === 'coins' && styles.activeTab]}>
-            <Text style={[styles.tabText, activeTab === 'coins' && styles.activeTabText]}>MONEDAS</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setActiveTab('taks')} style={[styles.tab, activeTab === 'taks' && styles.activeTab]}>
-            <Text style={[styles.tabText, activeTab === 'taks' && styles.activeTabText]}>EFECTOS</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setActiveTab('boards')} style={[styles.tab, activeTab === 'boards' && styles.activeTab]}>
-            <Text style={[styles.tabText, activeTab === 'boards' && styles.activeTabText]}>TABLEROS</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setActiveTab('boosts')} style={[styles.tab, activeTab === 'boosts' && styles.activeTab]}>
-            <Text style={[styles.tabText, activeTab === 'boosts' && styles.activeTabText]}>VENTAJAS</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setActiveTab('premium')} style={[styles.tab, activeTab === 'premium' && styles.activeTab]}>
-            <Text style={[styles.tabText, activeTab === 'premium' && styles.activeTabText]}>PREMIUM</Text>
-        </TouchableOpacity>
-      </View>
+      {/* PESTAÑAS (TABS) - SCROLLABLE */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsContainer}>
+        <View style={styles.tabs}>
+          <TouchableOpacity onPress={() => setActiveTab('coins')} style={[styles.tab, activeTab === 'coins' && styles.activeTab]}>
+              <Text style={[styles.tabText, activeTab === 'coins' && styles.activeTabText]}>MONEDAS</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setActiveTab('taks')} style={[styles.tab, activeTab === 'taks' && styles.activeTab]}>
+              <Text style={[styles.tabText, activeTab === 'taks' && styles.activeTabText]}>EFECTOS</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setActiveTab('boards')} style={[styles.tab, activeTab === 'boards' && styles.activeTab]}>
+              <Text style={[styles.tabText, activeTab === 'boards' && styles.activeTabText]}>TABLEROS</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setActiveTab('backgrounds')} style={[styles.tab, activeTab === 'backgrounds' && styles.activeTab]}>
+              <Text style={[styles.tabText, activeTab === 'backgrounds' && styles.activeTabText]}>FONDOS</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setActiveTab('particles')} style={[styles.tab, activeTab === 'particles' && styles.activeTab]}>
+              <Text style={[styles.tabText, activeTab === 'particles' && styles.activeTabText]}>PARTÍCULAS</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setActiveTab('boosts')} style={[styles.tab, activeTab === 'boosts' && styles.activeTab]}>
+              <Text style={[styles.tabText, activeTab === 'boosts' && styles.activeTabText]}>VENTAJAS</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setActiveTab('premium')} style={[styles.tab, activeTab === 'premium' && styles.activeTab]}>
+              <Text style={[styles.tabText, activeTab === 'premium' && styles.activeTabText]}>PREMIUM</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
 
       <ScrollView contentContainerStyle={{padding: 20, paddingBottom: 50}}>
         
@@ -189,7 +237,9 @@ export default function ShopScreen() {
                     const equipped = tapSkin === key;
                     return (
                         <TouchableOpacity key={key} style={[styles.skinCard, equipped && styles.equippedBorder]} onPress={() => handleItemAction('skin', key, item, unlockedSkins, tapSkin)}>
-                            <Text style={{fontSize: 40}}>{item.icon}</Text>
+                            <View style={{width: 60, height: 60, justifyContent: 'center', alignItems: 'center'}}>
+                              {renderIcon(item.icon, 40, '#6366f1')}
+                            </View>
                             <Text style={{fontWeight: 'bold', marginTop: 5}}>{item.name}</Text>
                             <Text style={{color: owned ? '#2ecc71' : '#f1c40f', fontWeight:'bold'}}>{owned ? (equipped ? 'EQUIPADO' : 'ADQUIRIDO') : `💰 ${item.price}`}</Text>
                         </TouchableOpacity>
@@ -259,7 +309,9 @@ export default function ShopScreen() {
                                 colors={['#8b5cf6', '#7c3aed']}
                                 style={styles.boostGradient}
                             >
-                                <Text style={styles.boostEmoji}>{item.icon}</Text>
+                                <View style={{width: 50, height: 50, justifyContent: 'center', alignItems: 'center'}}>
+                                  {renderIcon(item.icon, 32, '#fff')}
+                                </View>
                                 <View style={styles.boostInfo}>
                                     <Text style={styles.boostName}>{item.name}</Text>
                                     <Text style={styles.boostDesc}>{item.description}</Text>
@@ -276,6 +328,137 @@ export default function ShopScreen() {
                 <View style={styles.boostNote}>
                     <Text style={styles.noteText}>💡 Las ventajas solo funcionan en salas que tú creas</Text>
                     <Text style={styles.noteText}>⏳ Se activan al inicio de la partida</Text>
+                </View>
+            </View>
+        )}
+
+        {/* --- SECCIÓN FONDOS (BACKGROUNDS) --- */}
+        {activeTab === 'backgrounds' && (
+            <View>
+                <Text style={styles.sectionTitle}>🌌 Fondos de Zona Tap</Text>
+                <Text style={styles.sectionSubtitle}>Personaliza el fondo donde haces tap en modo clics libres</Text>
+
+                {Object.keys(BACKGROUND_ITEMS).map((key) => {
+                    const bg = BACKGROUND_ITEMS[key];
+                    const isUnlocked = unlockedBackgrounds.includes(key);
+                    const isEquipped = tapBackground === key;
+
+                    return (
+                        <TouchableOpacity
+                            key={key}
+                            disabled={isEquipped}
+                            onPress={() => {
+                                if (isUnlocked) {
+                                    equipItem('background', key);
+                                    Alert.alert("✅ Equipado!", `Fondo ${bg.name} activado`);
+                                } else {
+                                    const currencySymbol = bg.currency === 'gems' ? '💎' : '💰';
+                                    Alert.alert(
+                                        "Comprar Fondo",
+                                        `${bg.name}\nPrecio: ${bg.price} ${bg.currency === 'gems' ? 'gemas' : 'monedas'} ${currencySymbol}`,
+                                        [
+                                            { text: "Cancelar" },
+                                            {
+                                                text: "Comprar",
+                                                onPress: () => {
+                                                    const success = buyItem('background', key, bg.price, bg.currency);
+                                                    if (success) {
+                                                        Alert.alert("✅ ¡Comprado y equipado!", `Fondo ${bg.name} desbloqueado`);
+                                                    } else {
+                                                        Alert.alert("Error", `No tienes suficientes ${bg.currency === 'gems' ? 'gemas' : 'monedas'}.`);
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    );
+                                }
+                            }}
+                            style={[styles.backgroundCard, isEquipped && styles.equippedCard]}
+                        >
+                            <LinearGradient colors={bg.gradient} style={styles.backgroundPreview}>
+                                {isEquipped && <Check color="#fff" size={40} />}
+                            </LinearGradient>
+                            <View style={styles.backgroundInfo}>
+                                <Text style={styles.backgroundName}>{bg.name}</Text>
+                                {!isUnlocked && (
+                                    <Text style={styles.backgroundPrice}>
+                                        {bg.currency === 'gems' ? `💎 ${bg.price}` : `💰 ${bg.price}`}
+                                    </Text>
+                                )}
+                                {isEquipped && <Text style={styles.equippedLabel}>✓ Equipado</Text>}
+                            </View>
+                        </TouchableOpacity>
+                    );
+                })}
+            </View>
+        )}
+
+        {/* --- SECCIÓN PARTÍCULAS --- */}
+        {activeTab === 'particles' && (
+            <View>
+                <Text style={styles.sectionTitle}>✨ Partículas Exclusivas</Text>
+                <Text style={styles.sectionSubtitle}>Efectos especiales para modo clics libres</Text>
+
+                {Object.keys(PARTICLE_ITEMS).map((key) => {
+                    const particle = PARTICLE_ITEMS[key];
+                    const isUnlocked = unlockedParticles.includes(key);
+                    const isEquipped = particleSkin === key;
+
+                    return (
+                        <TouchableOpacity
+                            key={key}
+                            disabled={isEquipped}
+                            onPress={() => {
+                                if (isUnlocked) {
+                                    equipItem('particle', key);
+                                    Alert.alert("✅ Equipado!", `Partícula ${particle.name} activada`);
+                                } else {
+                                    const currencySymbol = particle.currency === 'gems' ? '💎' : '💰';
+                                    Alert.alert(
+                                        particle.premium ? "🌟 Item Premium" : "Comprar Partícula",
+                                        `${particle.name}\nPrecio: ${particle.price} ${particle.currency === 'gems' ? 'gemas' : 'monedas'} ${currencySymbol}`,
+                                        [
+                                            { text: "Cancelar" },
+                                            {
+                                                text: "Comprar",
+                                                onPress: () => {
+                                                    const success = buyItem('particle', key, particle.price, particle.currency);
+                                                    if (success) {
+                                                        Alert.alert("✅ ¡Desbloqueado y equipado!", `Partícula ${particle.name} lista para usar`);
+                                                    } else {
+                                                        Alert.alert("Error", `No tienes suficientes ${particle.currency === 'gems' ? 'gemas' : 'monedas'}.`);
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    );
+                                }
+                            }}
+                            style={[styles.particleCard, isEquipped && styles.equippedCard]}
+                        >
+                            <View style={[styles.particleIcon, { backgroundColor: particle.color + '33' }]}>
+                                <Text style={[styles.particleEmoji, { color: particle.color }]}>{particle.icon}</Text>
+                            </View>
+                            <View style={styles.particleInfo}>
+                                <Text style={styles.particleName}>
+                                    {particle.name}
+                                    {particle.premium && <Text style={styles.premiumBadge}> 👑</Text>}
+                                    {particle.special && <Text style={styles.specialBadge}> ⭐</Text>}
+                                </Text>
+                                {!isUnlocked && (
+                                    <Text style={styles.particlePrice}>
+                                        {particle.currency === 'gems' ? `💎 ${particle.price}` : `💰 ${particle.price}`}
+                                    </Text>
+                                )}
+                                {isEquipped && <Text style={styles.equippedLabel}>✓ Equipado</Text>}
+                            </View>
+                        </TouchableOpacity>
+                    );
+                })}
+
+                <View style={styles.noteBox}>
+                    <Text style={styles.noteText}>✨ Las partículas se activan al hacer tap en modo clics libres</Text>
+                    <Text style={styles.noteText}>💎 Items premium son exclusivos y permanentes</Text>
                 </View>
             </View>
         )}
@@ -382,7 +565,8 @@ export default function ShopScreen() {
         )}
 
       </ScrollView>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -393,6 +577,8 @@ const styles = StyleSheet.create({
   title: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
   coinBadge: { backgroundColor: 'rgba(0,0,0,0.3)', padding: 8, borderRadius: 15 },
   coinText: { color: '#ffd700', fontWeight: 'bold' },
+  gemBadge: { backgroundColor: 'rgba(0,0,0,0.3)', padding: 8, borderRadius: 15 },
+  gemText: { color: '#00d9ff', fontWeight: 'bold' },
   
   tabs: { flexDirection: 'row', backgroundColor: '#fff', margin: 20, borderRadius: 10, padding: 5 },
   tab: { flex: 1, padding: 12, alignItems: 'center', borderRadius: 8 },
@@ -554,5 +740,96 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderLeftWidth: 4,
     borderLeftColor: '#8b5cf6',
+  },
+
+  // FONDOS
+  backgroundCard: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 15,
+    marginBottom: 15,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  backgroundPreview: {
+    width: 120,
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backgroundInfo: {
+    flex: 1,
+    padding: 15,
+    justifyContent: 'center',
+  },
+  backgroundName: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#fff',
+    marginBottom: 5,
+  },
+  backgroundPrice: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fbbf24',
+  },
+
+  // PARTÍCULAS
+  particleCard: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 15,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  particleIcon: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  particleEmoji: {
+    fontSize: 36,
+    fontWeight: 'bold',
+  },
+  particleInfo: {
+    flex: 1,
+  },
+  particleName: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#fff',
+    marginBottom: 5,
+  },
+  particlePrice: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fbbf24',
+  },
+  premiumBadge: {
+    fontSize: 14,
+  },
+  specialBadge: {
+    fontSize: 14,
+  },
+  equippedCard: {
+    borderColor: '#22c55e',
+    borderWidth: 3,
+  },
+  equippedLabel: {
+    color: '#22c55e',
+    fontWeight: '900',
+    fontSize: 14,
+  },
+
+  // TAB CONTAINER
+  tabsContainer: {
+    maxHeight: 60,
   },
 });

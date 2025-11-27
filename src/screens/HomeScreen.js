@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import {
     Cpu,
     Crown,
+    Heart,
     Home,
     ShoppingCart,
     Smartphone,
@@ -11,16 +12,54 @@ import {
     Trophy,
     UserCircle,
     Users,
-    Wifi
+    Wifi,
+    Zap
 } from 'lucide-react-native';
-import { Dimensions, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useRef } from 'react';
+import { Animated, Dimensions, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useGame } from '../context/GameContext';
 
 const { width } = Dimensions.get('window');
 
+// Componente con animación spring
+const AnimatedGameButton = ({ style, onPress, children }) => {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.95,
+      useNativeDriver: true,
+      friction: 3,
+      tension: 40
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      friction: 3,
+      tension: 40
+    }).start();
+  };
+
+  return (
+    <TouchableOpacity
+      activeOpacity={1}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      onPress={onPress}
+    >
+      <Animated.View style={[style, { transform: [{ scale: scaleAnim }] }]}>
+        {children}
+      </Animated.View>
+    </TouchableOpacity>
+  );
+};
+
 export default function HomeScreen() {
   const navigation = useNavigation();
-  const { setGameMode, coins, userProfile } = useGame();
+  const { setGameMode, coins, gems, userProfile } = useGame();
 
   const handlePress = (mode, target, params = {}) => {
     setGameMode(mode);
@@ -62,7 +101,7 @@ export default function HomeScreen() {
             
             <View style={styles.gemContainer}>
               <Text style={styles.gemIcon}>💎</Text>
-              <Text style={styles.gemText}>50</Text>
+              <Text style={styles.gemText}>{gems || 50}</Text>
               <TouchableOpacity style={styles.addBtn}>
                 <Text style={styles.addBtnText}>+</Text>
               </TouchableOpacity>
@@ -98,56 +137,80 @@ export default function HomeScreen() {
           </LinearGradient>
         </TouchableOpacity>
 
-        {/* GRID DE MODOS DE JUEGO 2x2 */}
+        {/* GRID DE MODOS DE JUEGO 3x2 */}
         <View style={styles.gameGrid}>
           
           {/* EN LÍNEA */}
-          <TouchableOpacity 
+          <AnimatedGameButton
             style={[styles.gameCard, {backgroundColor: '#4ade80'}]}
             onPress={() => handlePress('online_code', 'Lobby', { mode: 'join' })}
           >
             <View style={styles.cardGradient}>
-              <Users color="#fff" size={50} strokeWidth={2.5} />
+              <Users color="#fff" size={35} strokeWidth={2.5} />
               <Text style={styles.cardTitle}>En línea</Text>
-              <Text style={styles.cardSubtitle}>Unirse con Código</Text>
+              <Text style={styles.cardSubtitle}>Unirse</Text>
             </View>
-          </TouchableOpacity>
+          </AnimatedGameButton>
 
           {/* VS CPU */}
-          <TouchableOpacity 
+          <AnimatedGameButton
             style={[styles.gameCard, {backgroundColor: '#facc15'}]}
             onPress={() => handlePress('offline', 'Lobby', { mode: 'cpu' })}
           >
             <View style={styles.cardGradient}>
-              <Cpu color="#fff" size={50} strokeWidth={2.5} />
+              <Cpu color="#fff" size={35} strokeWidth={2.5} />
               <Text style={styles.cardTitle}>Vs CPU</Text>
               <Text style={styles.cardSubtitle}>Práctica</Text>
             </View>
-          </TouchableOpacity>
+          </AnimatedGameButton>
+
+          {/* CLICS LIBRES */}
+          <AnimatedGameButton
+            style={[styles.gameCard, {backgroundColor: '#a78bfa'}]}
+            onPress={() => navigation.navigate('FreeClick')}
+          >
+            <View style={styles.cardGradient}>
+              <Zap color="#fff" size={35} strokeWidth={2.5} />
+              <Text style={styles.cardTitle}>Clics Libres</Text>
+              <Text style={styles.cardSubtitle}>Récord</Text>
+            </View>
+          </AnimatedGameButton>
 
           {/* LOCAL */}
-          <TouchableOpacity 
+          <AnimatedGameButton
             style={[styles.gameCard, {backgroundColor: '#f87171'}]}
             onPress={() => handlePress('offline', 'Lobby', { mode: 'local' })}
           >
             <View style={styles.cardGradient}>
-              <Smartphone color="#fff" size={50} strokeWidth={2.5} />
+              <Smartphone color="#fff" size={35} strokeWidth={2.5} />
               <Text style={styles.cardTitle}>Local</Text>
               <Text style={styles.cardSubtitle}>2 vs 2</Text>
             </View>
-          </TouchableOpacity>
+          </AnimatedGameButton>
 
           {/* CREAR SALA */}
-          <TouchableOpacity 
+          <AnimatedGameButton
             style={[styles.gameCard, {backgroundColor: '#60a5fa'}]}
             onPress={() => handlePress('online_code', 'Lobby', { mode: 'create' })}
           >
             <View style={styles.cardGradient}>
-              <Wifi color="#fff" size={50} strokeWidth={2.5} />
+              <Wifi color="#fff" size={35} strokeWidth={2.5} />
               <Text style={styles.cardTitle}>Crear Sala</Text>
-              <Text style={styles.cardSubtitle}>Ser Anfitrión</Text>
+              <Text style={styles.cardSubtitle}>Anfitrión</Text>
             </View>
-          </TouchableOpacity>
+          </AnimatedGameButton>
+
+          {/* MODO ROMÁNTICO */}
+          <AnimatedGameButton
+            style={[styles.gameCard, {backgroundColor: '#f472b6'}]}
+            onPress={() => navigation.navigate('RomanticMode')}
+          >
+            <View style={styles.cardGradient}>
+              <Heart color="#fff" size={35} strokeWidth={2.5} fill="#fff" />
+              <Text style={styles.cardTitle}>Romántico</Text>
+              <Text style={styles.cardSubtitle}>Te Amo</Text>
+            </View>
+          </AnimatedGameButton>
 
         </View>
 
@@ -371,12 +434,12 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     paddingHorizontal: 20,
     paddingTop: 20,
-    gap: 15,
+    gap: 12,
   },
   gameCard: {
-    width: (width - 55) / 2,
-    height: (width - 55) / 2,
-    borderRadius: 30,
+    width: (width - 64) / 3,
+    height: (width - 64) / 3,
+    borderRadius: 20,
     overflow: 'hidden',
     elevation: 5,
     shadowColor: '#000',
@@ -391,16 +454,16 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#fff',
-    marginTop: 10,
+    marginTop: 8,
     textAlign: 'center',
   },
   cardSubtitle: {
-    fontSize: 12,
+    fontSize: 9,
     color: 'rgba(255,255,255,0.9)',
-    marginTop: 4,
+    marginTop: 2,
     textAlign: 'center',
   },
 
